@@ -37,3 +37,8 @@ Thumbs.db
 .eggs/
 dist/
 build/
+
+
+# Log files
+
+*.log
