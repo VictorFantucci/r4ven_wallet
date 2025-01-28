@@ -3,15 +3,12 @@ import sys
 
 utils_directory =  os.path.dirname(os.path.dirname(__file__))
 
-def get_logs_folder() -> str:
+def get_src_folder() -> str:
     """
-    Returns the path to the logs folder.
-
-    The logs folder is located within the `src/logs` directory inside the
-    `utils_directory`.
+    Returns the path to the source (src) folder.
 
     Returns:
-        str: The absolute path to the logs folder.
+        str: The absolute path to the src folder.
     """
-    return os.path.join(utils_directory, "src", "logs")
+    return os.path.join(utils_directory, "src")
 
