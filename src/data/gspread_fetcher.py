@@ -1,3 +1,7 @@
+"""
+Script that contains the class used to fetches data from Google Sheets.
+"""
+
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
@@ -38,7 +42,8 @@ class GoogleSheetsReader:
             logger.error(f"Authorization failed: {e}")
             raise
 
-    def get_sheet_as_dataframe(self, sheet_id: str,
+    def get_sheet_as_dataframe(self,
+                               sheet_id: str,
                                worksheet_id: int,
                                drop_last_row: bool = False) -> pd.DataFrame:
         """

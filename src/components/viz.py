@@ -1,9 +1,13 @@
+"""
+Script that contains class with plotly visualization used across multiple pages of the project.
+"""
+
+# Load imports
 import pandas as pd
 from typing import Union, List
 import plotly.express as px
 import plotly.graph_objects as go
 import logging
-import traceback
 from r4ven_utils.log4me import r4venLogManager
 
 class DataVisualizer:

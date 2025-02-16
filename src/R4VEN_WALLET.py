@@ -1,3 +1,8 @@
+"""
+Script that contains the streamlit application of my financial independence wallet.
+"""
+
+# Load imports
 import os
 import sys
 import streamlit as st
