@@ -6,6 +6,7 @@ from PIL import Image
 # Load relative imports
 from utils import get_src_folder
 from data.load_data import WalletDataLoader
+from components.components import set_page_config
 
 app_directory =  os.path.dirname(os.path.dirname(__file__))
 sys.path.append(app_directory)
@@ -41,13 +42,10 @@ def investment_goals(current_value: float) -> None:
 
 # Main function
 def app() -> None:
-    # Change page name and icon
-    page_icon = Image.open(os.path.join(app_directory, 'src', 'imgs', 'r4ven_icon.png'))
 
-    page_config = {'page_title': 'r4ven_wallet',
-                   'page_icon': page_icon,
-                   'layout': 'wide'}
-
+    # Create configuration dict
+    page_config = set_page_config(page_title='r4ven_wallet')
+    # Set page configuration
     st.set_page_config(**page_config)
 
     st.title('R4VEN - Independência Financeira')
