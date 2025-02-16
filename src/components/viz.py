@@ -194,3 +194,105 @@ class DataVisualizer:
             # Log the exception details and re-raise the exception
             logger.error(f"Data visualization failed: {e}")
             raise
+
+    def r4ven_stacked_bar_plot(self,
+                            df: pd.DataFrame,
+                            x_data: str,
+                            y_stack_data: str,
+                            y_stack_label: str = None,
+                            group_method: str = 'sum',
+                            title: str = None,
+                            tickformat: str = None) -> go.Figure:
+        """
+        Generate and display a stacked bar plot using Plotly.
+
+        Args:
+            df (pd.DataFrame): The DataFrame containing the data to be plotted.
+            x_data (str): The column name in the DataFrame to be used as the x-axis data.
+            y_stack_data (str): The column name in the DataFrame to be used for stacking.
+            y_stack_label (str, optional): The label for the y-axis of the stacked bar plot. Defaults to None.
+            group_method (str, optional): The method to aggregate data for stacking.
+                - 'sum': Aggregates numeric values by summing them (default).
+                - 'size': Counts the number of occurrences for each category.
+            title (str, optional): The title for the plot. Defaults to None.
+            tickformat (str, optional): The tick format to be used in the x-axis labels. Defaults to None.
+
+        Returns:
+            go.Figure: The Plotly figure containing the stacked bar plot.
+        """
+
+        # Create a logger object for this function
+        logger = self.get_logger()
+
+        try:
+            # Validate group_method
+            if group_method not in ['sum', 'size']:
+                raise ValueError("group_method must be either 'sum' or 'size'.")
+
+            # Filter out rows where x_data is None or NaN
+            df = df[df[x_data].notna()]
+
+            # Perform grouping based on the chosen method
+            if group_method == 'sum':
+                grouped_data = df.groupby([x_data, y_stack_data])[y_stack_label].sum().reset_index()
+            else:  # group_method == 'size'
+                grouped_data = df.groupby([x_data, y_stack_data]).size().reset_index(name='counts')
+
+            # Determine the correct column to pivot on
+            value_column = 'counts' if group_method == 'size' else y_stack_label
+
+            # Remove any rows where the selected column has 0 values
+            grouped_data = grouped_data[grouped_data[value_column] > 0]
+
+            # Create a pivot table where rows are x_data and columns are y_stack_data categories
+            pivot_data = grouped_data.pivot(index=x_data, columns=y_stack_data, values=value_column).fillna(0)
+
+            # Drop rows where all values are 0.0
+            pivot_data = pivot_data[(pivot_data != 0).any(axis=1)]
+
+            # Create the figure for the stacked bar plot
+            fig = go.Figure()
+
+            # Define a list of colors for the stacked bars
+            stack_colors = self.get_dracula_color_palette()
+
+            # Replace x_data with a numeric index for plotting
+            x_numeric = list(range(len(pivot_data.index)))
+
+            # Add traces for each category in y_stack_data to create the stacked bars
+            for i, column in enumerate(pivot_data.columns):
+                fig.add_trace(go.Bar(
+                    x=x_numeric,
+                    y=pivot_data[column],
+                    name=column,
+                    marker=dict(color=stack_colors[i % len(stack_colors)]),
+                    text=pivot_data[column].apply(lambda v: f"{v:.2f}" if isinstance(v, float) else str(v)),
+                    textposition='auto',  # Adjust text position for readability
+                    opacity=0.7  # Adjust opacity to make the text pop
+                ))
+
+            # Updating layout to create the stacked bar plot
+            fig.update_layout(title_text=title,
+                            barmode='stack',  # Set the bar mode to 'stack' for stacking bars
+                            )
+
+            # Updating y-axis label
+            fig.update_yaxes(title_text=y_stack_label)
+
+            # Update x-axis to use numeric indices but show actual date labels
+            fig.update_xaxes(
+                tickmode='array',  # Use 'array' mode for custom tick values
+                tickvals=x_numeric,  # Position of each tick corresponds to numeric index
+                ticktext=pivot_data.index.astype(str),  # Display date labels from the index
+                tickangle=45,  # Rotate labels for better readability
+                tickfont=dict(size=10),
+                tickformat=tickformat  # Optionally format the ticks for date/time
+            )
+
+            # Return the plot
+            return fig
+
+        except Exception as e:
+            # Log the exception details and re-raise the exception
+            logger.error(f"Data visualization failed: {e}")
+            raise
