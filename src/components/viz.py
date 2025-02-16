@@ -296,3 +296,43 @@ class DataVisualizer:
             # Log the exception details and re-raise the exception
             logger.error(f"Data visualization failed: {e}")
             raise
+
+    def r4ven_gauge_plot(self, total_value: float,
+                         actual_value: float,
+                         title: str = "Gauge Chart") -> go.Figure:
+        """
+        Generate and display a gauge chart using Plotly.
+
+        Args:
+            total_value (float): The maximum value of the gauge.
+            actual_value (float): The current value to be displayed on the gauge.
+            title (str): The title for the gauge chart.
+
+        Returns:
+            go.Figure: The Plotly figure containing the gauge chart.
+        """
+
+        # Create a logger object for this function
+        logger = self.get_logger()
+
+        try:
+            # Ensure actual_value does not exceed total_value
+            actual_value = min(actual_value, total_value)
+
+            # Creating a gauge chart with Plotly
+            fig = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=actual_value,
+                title={'text': title},
+                gauge={
+                    'axis': {'range': [0, total_value]},
+                    'bar': {'color': self.get_dracula_color_palette()[-2]}
+                    }
+                )
+            )
+
+            return fig
+
+        except Exception as e:
+            logger.error(f"Gauge visualization failed: {e}")
+            raise
