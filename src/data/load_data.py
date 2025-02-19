@@ -1,8 +1,8 @@
 """
 Script that contains classes used to load multiple sheets and worksheets from my Google Drive.
 """
-
-# Load imports
+# ------------------------------------------------------------------------------------------------ #
+# IMPORT
 import os
 import logging
 import pandas as pd
@@ -12,16 +12,20 @@ from r4ven_utils.log4me import r4venLogManager
 # Ignore specific warning
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# Load relative imports
-from utils import get_src_folder
-from data.gspread_fetcher import GoogleSheetsReader
-
 # Load environment variables
 from dotenv import load_dotenv, find_dotenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
-# Log data
+# ------------------------------------------------------------------------------------------------ #
+
+# RELATIVE IMPORTS
+
+# DATA
+from data.gspread_fetcher import GoogleSheetsReader
+
+# ------------------------------------------------------------------------------------------------ #
+# USER LOG DATA LOADER
 class LogsDataLoader:
     def __init__(self, logs_folder):
         """
@@ -108,7 +112,8 @@ class LogsDataLoader:
         worksheet_id = os.environ.get('log_passive_income_worksheet_id')  # Fetch worksheet ID for passive income logs
         return self._load_data_from_sheet(sheet_id, worksheet_id, "Data", ["Valor Líquido (R$)"])
 
-# General data
+# ------------------------------------------------------------------------------------------------ #
+# WALLET OVERVIEW DATA LOADER
 class WalletDataLoader:
     def __init__(self, logs_folder: str):
         """
@@ -261,7 +266,8 @@ class WalletDataLoader:
         else:
             return None  # Return None if data fetching fails
 
-#
+# ------------------------------------------------------------------------------------------------ #
+# ASSET DATA LOADER
 class AssetsDataLoader:
     def __init__(self, logs_folder):
         """

@@ -2,12 +2,16 @@
 Script that contains the class used to fetches data from Google Sheets.
 """
 
+# ------------------------------------------------------------------------------------------------ #
+# IMPORT
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import logging
 from r4ven_utils.log4me import r4venLogManager
 
+# ------------------------------------------------------------------------------------------------ #
+# GOOGLE SHEET DATA FETCH CLASS
 class GoogleSheetsReader:
     def __init__(self, credentials_file: str, base_log_dir: str):
         """
