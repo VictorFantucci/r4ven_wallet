@@ -329,7 +329,7 @@ class AssetsDataLoader:
 
             # Convert specified columns to numeric
             for column in numeric_columns:
-                df[column] = pd.to_numeric(df[column], errors="coerce")
+                df[column] = pd.to_numeric(df[column].str.replace(",", " ", regex=True), errors="coerce")
 
             return df  # Return the preprocessed DataFrame
 
@@ -394,3 +394,52 @@ class AssetsDataLoader:
                            'Sugestão']
 
         return self._load_data_from_sheet(sheet_id, worksheet_id, numeric_columns)
+
+    def load_asset_result_data(self):
+        """
+        Fetches and preprocesses assets results data.
+
+        Returns:
+            pd.DataFrame: Preprocessed assets results data.
+        """
+        sheet_id = os.environ.get('wallet_sheet_id')  # Fetch sheet ID from environment variables
+        worksheet_id = os.environ.get('asset_result_worksheet_id')  # Fetch worksheet ID for transactions
+
+        # Define numeric columns
+        numeric_columns = ['Quantidade', 'Gasto (R$)',
+                           'Investido (R$)', 'Vendido (R$)',
+                           'Cotação (R$)', 'Preço Médio (R$)',
+                           'Ganho (R$)', 'Proventos (R$)',
+                           'Ganho Ex (R$)', 'Lucro Vendas (R$)',
+                           'Ganho (%)', 'Ganho Ex (%)'
+                           ]
+
+        return self._load_data_from_sheet(sheet_id, worksheet_id, numeric_columns)
+
+    def load_asset_dividends_data(self):
+        """
+        Fetches and preprocesses assets dividends data.
+
+        Returns:
+            pd.DataFrame: Preprocessed assets dividends data.
+        """
+        sheet_id = os.environ.get('wallet_sheet_id')  # Fetch sheet ID from environment variables
+        worksheet_id = os.environ.get('asset_dividends_worksheet_id')  # Fetch worksheet ID for transactions
+
+        # Define numeric columns
+        numeric_columns = ['Total (R$)', 'Acumulado (R$)',
+                           'Total Investido (R$)', 'DY - Carteira (%)',
+                           'Total - FII (R$)', 'Acumulado - FII (R$)',
+                           'Total Investido - FII (R$)', 'DY - FII (%)',
+                           'Total - Ações (R$)', 'Acumulado - Ações (R$)',
+                           'Total Investido - Ações (R$)', 'DY - Ações (%)',
+                           'Total - Small Caps (R$)', 'Acumulado - Small Caps (R$)',
+                           'Total Investido - Small Caps (R$)', 'DY - Small Caps (%)',
+                           ]
+
+        df = self._load_data_from_sheet(sheet_id, worksheet_id, numeric_columns)
+
+        # Rename column Mês/Ano
+        df.rename(columns={'Mês/Ano':'Mês'}, inplace=True)
+
+        return df
