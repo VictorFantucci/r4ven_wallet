@@ -2,7 +2,8 @@
 Script that contains class with plotly visualization used across multiple pages of the project.
 """
 
-# Load imports
+# ------------------------------------------------------------------------------------------------ #
+# IMPORTS
 import pandas as pd
 from typing import Union, List
 import plotly.express as px
@@ -26,18 +27,29 @@ class DataVisualizer:
         """ Helper method to get the logger dynamically """
         return self.log_manager.function_logger(__file__, console_level=logging.INFO)
 
-    def get_dracula_color_palette(self):
-        """ Helper method to get the Dracula color palette"""
+    def get_r4ven_color_palette(self):
+        """ Helper method to get the Nord color palette"""
         return [
-            "#6272a4",  # Blue
-            "#50fa7b",  # Green
-            "#f1fa8c",  # Yellow
-            "#ff5555",  # Red
-            "#8be9fd",  # Cyan
-            "#ff79c6",  # Pink
-            "#bd93f9",  # Purple
-            "#ffb86c",  # Orange
-            ]
+            # Light Colors
+            "#81A1C1",  # Light Blue
+            "#88C0D0",  # Light Cyan
+            "#A3BE8C",  # Light Green
+            "#EBCB8B",  # Light Yellow
+            "#D08770",  # Light Orange
+            "#BF616A",  # Light Red
+            "#B48EAD",  # Light Pink
+            "#D8DEE9",  # Light Gray
+
+            # Dark Colors
+            "#5E81AC",  # Dark Blue
+            "#4C566A",  # Dark Gray-Blue
+            "#556B2F",  # Dark Green
+            "#8F734D",  # Dark Yellow
+            "#9D5C4C",  # Dark Orange
+            "#7D3A3A",  # Dark Red
+            "#7D5A87",  # Dark Pink
+            "#3B4252",  # Dark Gray
+        ]
 
     def r4ven_line_plot(self,
                         df: pd.DataFrame,
@@ -67,7 +79,7 @@ class DataVisualizer:
 
         try:
             # Define a list of colors for lines
-            line_colors = self.get_dracula_color_palette()
+            line_colors = self.get_r4ven_color_palette()
 
             # Creating a line plot with Plotly Express
             fig = px.line(df, x=x_data, y=y_data, title=f'Line Plot of the {dataframe_name}',
@@ -149,7 +161,7 @@ class DataVisualizer:
             fig = go.Figure()
 
             # Define a color palette for the bars
-            bar_colors = self.get_dracula_color_palette()
+            bar_colors = self.get_r4ven_color_palette()
 
             # Add a single trace for the bar chart
             if orientation == 'vertical':
@@ -258,7 +270,7 @@ class DataVisualizer:
             fig = go.Figure()
 
             # Define a list of colors for the stacked bars
-            stack_colors = self.get_dracula_color_palette()
+            stack_colors = self.get_r4ven_color_palette()[1:]
 
             # Replace x_data with a numeric index for plotting
             x_numeric = list(range(len(pivot_data.index)))
@@ -277,7 +289,7 @@ class DataVisualizer:
 
             # Updating layout to create the stacked bar plot
             fig.update_layout(title_text=title,
-                            barmode='stack',  # Set the bar mode to 'stack' for stacking bars
+                              barmode='stack',
                             )
 
             # Updating y-axis label
@@ -301,7 +313,8 @@ class DataVisualizer:
             logger.error(f"Data visualization failed: {e}")
             raise
 
-    def r4ven_gauge_plot(self, total_value: float,
+    def r4ven_gauge_plot(self,
+                         total_value: float,
                          actual_value: float,
                          title: str = "Gauge Chart") -> go.Figure:
         """
@@ -330,7 +343,7 @@ class DataVisualizer:
                 title={'text': title},
                 gauge={
                     'axis': {'range': [0, total_value]},
-                    'bar': {'color': self.get_dracula_color_palette()[-2]}
+                    'bar': {'color': self.get_r4ven_color_palette()[-2]}
                     }
                 )
             )
@@ -339,4 +352,51 @@ class DataVisualizer:
 
         except Exception as e:
             logger.error(f"Gauge visualization failed: {e}")
+            raise
+
+    def r4ven_pie_plot(self,
+                       df: pd.DataFrame,
+                       value_column: str,
+                       label_column: str,
+                       title: str = "Pie Chart") -> go.Figure:
+        """
+        Generate and display a pie chart using Plotly from a DataFrame.
+
+        Args:
+            df (pandas.DataFrame): The DataFrame containing the data.
+            value_column (str): The name of the column with values for the pie chart.
+            label_column (str): The name of the column with labels for the pie chart.
+            title (str): The title for the pie chart.
+
+        Returns:
+            go.Figure: The Plotly figure containing the pie chart.
+        """
+
+        # Create a logger object for this function
+        logger = self.get_logger()
+
+        try:
+            # Ensure the specified columns exist in the DataFrame
+            if value_column not in df.columns or label_column not in df.columns:
+                raise ValueError(f"Columns '{value_column}' or '{label_column}' not found in the DataFrame.")
+
+            # Extract values and labels from the DataFrame
+            values = df[value_column].tolist()
+            labels = df[label_column].tolist()
+
+            # Creating a pie chart with Plotly
+            fig = go.Figure(go.Pie(
+                values=values,
+                labels=labels,
+                title={'text': title},
+                marker=dict(
+                    colors=self.get_r4ven_color_palette()[:len(values)]  # Adjusting color palette based on number of slices
+                ),
+                opacity=0.7
+            ))
+
+            return fig
+
+        except Exception as e:
+            logger.error(f"Pie chart visualization failed: {e}")
             raise
