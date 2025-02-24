@@ -99,7 +99,7 @@ class LogsDataLoader:
         """
         sheet_id = os.environ.get('wallet_sheet_id')  # Fetch sheet ID from environment variables
         worksheet_id = os.environ.get('log_transactions_worksheet_id')  # Fetch worksheet ID for transactions
-        return self._load_data_from_sheet(sheet_id, worksheet_id, "Data Negócio", ["Preço (R$)", "Preço Total (R$)"])
+        return self._load_data_from_sheet(sheet_id, worksheet_id, "Data", ["Preço (R$)", "Preço Total (R$)"])
 
     def load_passive_income_data(self):
         """
