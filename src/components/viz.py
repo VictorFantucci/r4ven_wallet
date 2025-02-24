@@ -4,12 +4,23 @@ Script that contains class with plotly visualization used across multiple pages 
 
 # ------------------------------------------------------------------------------------------------ #
 # IMPORTS
+import streamlit as st
 import pandas as pd
 from typing import Union, List
 import plotly.express as px
 import plotly.graph_objects as go
 import logging
 from r4ven_utils.log4me import r4venLogManager
+
+# ------------------------------------------------------------------------------------------------ #
+# RELATIVE IMPORTS
+
+# UTILS
+from utils import get_src_folder
+
+# ------------------------------------------------------------------------------------------------ #
+# DEFINE CONSTANTS
+logs_folder = get_src_folder()
 
 class DataVisualizer:
     def __init__(self, base_log_dir: str):
@@ -400,3 +411,133 @@ class DataVisualizer:
         except Exception as e:
             logger.error(f"Pie chart visualization failed: {e}")
             raise
+
+
+# ------------------------------------------------------------------------------------------------ #
+# VIZ FUNCTIONS
+
+def show_stacked_bar_chart(df: pd.DataFrame,
+                                  x_data: str,
+                                  y_stack_data: str,
+                                  y_stack_label: str,
+                                  title: str,
+                                  tickformat: str = None):
+    """
+    Display a stacked bar chart for income data.
+
+    Args:
+        df (DataFrame): The input data frame containing income details.
+        x_data (str): The column name representing the x-axis.
+        y_stack_data (str): The column name representing the stacked categories.
+        y_stack_label (str): The column name representing the values to be summed.
+        title (str): The title of the chart.
+        tickformat (str): The format for the x-axis ticks.
+            Defaults to None, to auto-format the x-axis.
+
+    Returns:
+        None: Displays the generated stacked bar chart.
+    """
+
+    # Agrupar por x_col e y_stack_data
+    income_by_type = df.groupby([x_data, y_stack_data])[y_stack_label].sum().reset_index()
+
+    viz = DataVisualizer(logs_folder)
+
+    # Generate the stacked bar plot
+    fig = viz.r4ven_stacked_bar_plot(
+        df=income_by_type,
+        x_data=x_data,
+        y_stack_data=y_stack_data,
+        y_stack_label=y_stack_label,
+        title=title,
+        tickformat=tickformat
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+def show_bar_chart(df: pd.DataFrame,
+                   x_data: str,
+                   y_value_data: str,
+                   y_value_label: str,
+                   title: str,
+                   tickformat: str = None):
+    """
+    Display a bar chart for accumulated income data.
+
+    Args:
+        df (DataFrame): The input data frame containing income details.
+        x_data (str): The column name representing the x-axis.
+        y_value_data(str): The column name representing the s.
+        y_value_label (str): The column name representing the values to be summed.
+        title (str): The title of the chart.
+        tickformat (str): The format for the x-axis ticks.
+            Defaults to None, to auto-format the x-axis.
+
+    Returns:
+        None: Displays the generated stacked bar chart.
+    """
+    # Ensure DataFrame is sorted by x_data
+    df_sorted = df.sort_values(by=x_data)
+
+    # Group by x_data and sum values
+    df_grouped = df_sorted.groupby(x_data)[y_value_data].sum().reset_index()
+
+    logs_folder = get_src_folder()
+    viz = DataVisualizer(logs_folder)
+
+    # Plot the accumulated values
+    fig = viz.r4ven_bar_plot(
+        df=df_grouped,
+        x_data=x_data,
+        y_value_data=y_value_data,
+        y_value_label=y_value_label,
+        title=title,
+        tickformat=tickformat
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+def show_accumulated_bar_chart(df: pd.DataFrame,
+                                      x_data: str,
+                                      y_value_data: str,
+                                      y_value_label: str,
+                                      title: str,
+                                      tickformat: str = None):
+    """
+    Display a bar chart for accumulated income data.
+
+    Args:
+        df (DataFrame): The input data frame containing income details.
+        x_data (str): The column name representing the x-axis.
+        y_value_data(str): The column name representing the s.
+        y_value_label (str): The column name representing the values to be summed.
+        title (str): The title of the chart.
+        tickformat (str): The format for the x-axis ticks.
+            Defaults to None, to auto-format the x-axis.
+
+    Returns:
+        None: Displays the generated stacked bar chart.
+    """
+    # Ensure DataFrame is sorted by x_data
+    df_sorted = df.sort_values(by=x_data)
+
+    # Group by x_data and sum values
+    df_grouped = df_sorted.groupby(x_data)[y_value_data].sum().reset_index()
+
+    # Compute cumulative sum
+    df_grouped["Valor Acumulado"] = df_grouped[y_value_data].cumsum()
+
+    logs_folder = get_src_folder()
+    viz = DataVisualizer(logs_folder)
+
+    # Plot the accumulated values
+    fig = viz.r4ven_bar_plot(
+        df=df_grouped,
+        x_data=x_data,
+        y_value_data="Valor Acumulado",
+        y_value_label=y_value_label,
+        title=title,
+        tickformat=tickformat
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
