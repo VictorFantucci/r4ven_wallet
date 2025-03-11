@@ -12,6 +12,11 @@ from PIL import Image
 from typing import List, Union, Dict
 from streamlit_option_menu import option_menu
 
+# Load environment variables
+from dotenv import load_dotenv, find_dotenv
+dotenv_path = find_dotenv()
+load_dotenv(dotenv_path)
+
 # ------------------------------------------------------------------------------------------------ #
 # IMPORTS
 
@@ -46,6 +51,36 @@ def set_page_config(page_title: str) -> dict:
     }
 
     return page_config
+
+def check_login():
+    """Checks if the user is authenticated and displays the login screen if necessary."""
+
+    # Secure password
+    CORRECT_PASSWORD = os.environ.get('app_password')
+
+    # Initialize authentication state
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+
+    # If the user is not authenticated, show the login screen
+    if not st.session_state.authenticated:
+        st.title("🔒 Login Necessário")
+        password = st.text_input("Digite a senha:", type="password")
+
+        if st.button("Entrar"):
+            if password == CORRECT_PASSWORD:
+                st.session_state.authenticated = True
+                st.rerun()
+            else:
+                st.error("❌ Senha incorreta! Tente novamente.")
+
+        # Stop page execution until the user logs in
+        st.stop()
+
+    # Add a logout button in the sidebar
+    if st.sidebar.button("🚪 Sair"):
+        st.session_state.authenticated = False
+        st.rerun()
 
 # ------------------------------------------------------------------------------------------------ #
 # FILTER COMPONENTS
