@@ -49,14 +49,16 @@ class GoogleSheetsReader:
     def get_sheet_as_dataframe(self,
                                sheet_id: str,
                                worksheet_id: int,
-                               drop_last_row: bool = False) -> pd.DataFrame:
+                               drop_last_rows: bool = False,
+                               n_rows: int = 1) -> pd.DataFrame:
         """
         Fetches data from a Google Sheets worksheet and returns it as a pandas DataFrame.
 
         Args:
             sheet_id (str): The ID of the Google Sheet.
             worksheet_id (int): The ID of the worksheet within the sheet.
-            drop_last_row (bool): If True, the last row of the DataFrame will be dropped.
+            drop_last_rows (bool): If True, the last row of the DataFrame will be dropped.
+            n_rows (int): Number of rows to be dropped if drop_last_rows is True.
 
         Returns:
             pandas.DataFrame: containing the worksheet data
@@ -74,9 +76,9 @@ class GoogleSheetsReader:
 
             df = pd.DataFrame(data[1:], columns=data[0])  # Use the first row as column names
 
-            if drop_last_row:
+            if drop_last_rows:
                 logger.info("Dropping the last row of the DataFrame as requested.")
-                df = df[:-1]
+                df = df[:-1*n_rows]
 
             logger.info(f"Data successfully loaded for sheet: {sheet_id}, worksheet: {worksheet_id}")
             return df
