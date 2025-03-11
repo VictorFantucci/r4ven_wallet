@@ -11,7 +11,7 @@ from PIL import Image
 # Load relative imports
 from utils import get_src_folder
 from data.load_data import WalletDataLoader
-from components.components import set_page_config
+from components.components import set_page_config, check_login
 
 app_directory =  os.path.dirname(os.path.dirname(__file__))
 sys.path.append(app_directory)
@@ -72,6 +72,9 @@ def app() -> None:
     # Set page configuration
     st.set_page_config(**page_config)
 
+    # Check login before loading the page
+    check_login()
+
     st.title('R4VEN - Independência Financeira')
 
     # Initialize the WalletDataLoader
@@ -113,17 +116,19 @@ def app() -> None:
         st.subheader('Metas a bater:')
         investment_goals(wallet_goal.iloc[0, 1])
 
-    # Wallet Overview
-    st.subheader('Resultado da Carteira')
-    wallet_overview = wallet_loader.load_wallet_overview()
-    wallet_overview.loc[:, ['Variação (%)']] *= 100
-    st.dataframe(wallet_overview, hide_index=True)
+    with col1:
+        # Wallet Overview
+        st.subheader('Resultado da Carteira')
+        wallet_overview = wallet_loader.load_wallet_overview()
+        wallet_overview.loc[:, ['Variação (%)']] *= 100
+        st.dataframe(wallet_overview, hide_index=True)
 
-    # Wallet Division
-    st.subheader("Alocação da Carteira")
-    wallet_division = wallet_loader.load_wallet_division()
-    wallet_division.loc[:, ['% Ideal', '% Atual']] *= 100
-    st.dataframe(wallet_division, hide_index=True)
+    with col1:
+        # Wallet Division
+        st.subheader("Alocação da Carteira")
+        wallet_division = wallet_loader.load_wallet_division()
+        wallet_division.loc[:, ['% Ideal', '% Atual']] *= 100
+        st.dataframe(wallet_division, hide_index=True)
 
 if __name__ == '__main__':
     app()
