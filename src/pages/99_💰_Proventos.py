@@ -17,7 +17,7 @@ from utils import get_src_folder
 from data.load_data import LogsDataLoader
 
 # COMPONENTS
-from components.components import set_page_config
+from components.components import set_page_config, check_login
 from components.components import \
     (
         get_valid_aggregate_options,
@@ -32,7 +32,6 @@ from components.viz import show_stacked_bar_chart, show_accumulated_bar_chart
 # DEFINE CONSTANTS
 logs_folder = get_src_folder()
 
-
 # ------------------------------------------------------------------------------------------------ #
 # MAIN PAGE FUNCTION
 
@@ -43,6 +42,9 @@ def log_passive_income_page():
     page_config = set_page_config(page_title='Proventos')
     # Set page configuration
     st.set_page_config(**page_config)
+
+    # Check login before loading the page
+    check_login()
 
     st.title('Proventos')
     st.markdown("***")

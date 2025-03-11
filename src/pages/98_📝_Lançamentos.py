@@ -18,7 +18,7 @@ from utils import get_src_folder
 from data.load_data import LogsDataLoader
 
 # COMPONENTS
-from components.components import set_page_config
+from components.components import set_page_config, check_login
 from components.components import \
     (
         get_valid_aggregate_options,
@@ -43,6 +43,9 @@ def log_transaction_page():
     page_config = set_page_config(page_title='Lançamentos')
     # Set page configuration
     st.set_page_config(**page_config)
+
+    # Check login before loading the page
+    check_login()
 
     st.title('Lançamentos')
     st.markdown("***")

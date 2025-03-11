@@ -18,7 +18,7 @@ from data.load_data import AssetsDataLoader, LogsDataLoader
 
 # COMPONENTS
 from components.components import set_page_config, reorder_dataframe_columns
-from components.components import set_page_main_menu
+from components.components import set_page_main_menu, check_login
 from components.components import \
     (
         get_valid_aggregate_options,
@@ -44,8 +44,6 @@ def display_data(assets_loader, viz):
     df = df[:-1]
     df.loc[:, ['% Ideal', '% Atual']] *= 100
 
-    st.dataframe(df, hide_index=True)
-
     col1, col2 = st.columns(2)
 
     with col1:
@@ -54,6 +52,11 @@ def display_data(assets_loader, viz):
     with col2:
         fig = viz.r4ven_pie_plot(df, 'Total (R$)', 'Segmento', 'Segmentos')
         st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown('***')
+    st.subheader('🗂️ Base de Dados')
+    with st.expander('Carteira de FIIs'):
+        st.dataframe(df, hide_index=True)
 
 # 2. RESULTS PAGE
 def display_portfolio_result(assets_loader):
@@ -88,6 +91,33 @@ def display_dividends(assets_loader, log_loader):
     # Filter stocks data
     df = df[df['Tipo Ativo'] == 'FII']
 
+    st.subheader('1 - Visão Anualizada')
+
+    # Extract unique years for filter selection
+    years = sorted(df["Mês"].astype(str).str[:4].unique(), reverse=True)
+
+    # Sidebar Year Selection
+    selected_year = st.selectbox("Selecione o Ano", years, index=0)
+
+    # Filter DataFrame by Selected Year
+    df_filtered = df[df["Mês"].str[:4] == selected_year]
+
+    # Pivot Table
+    pivot_df = df_filtered.pivot_table(
+        index="Ativo",
+        columns="Mês",
+        values="Valor Líquido (R$)",
+        aggfunc="sum",
+        fill_value=0
+    )
+
+    # Add "Total" Column
+    pivot_df["Total"] = pivot_df.sum(axis=1)
+
+    st.dataframe(pivot_df, use_container_width=True)
+
+    st.subheader('2 - Visão por Período')
+
     # Get valid options for aggregation based on the date column
     valid_options = get_valid_aggregate_options(df=df, date_column='Data')
 
@@ -105,6 +135,7 @@ def display_dividends(assets_loader, log_loader):
                     '%Y-%m')
 
     st.markdown('***')
+    st.subheader('🗂️ Base de Dados')
 
     with st.expander("💰 Ver Dividendos Consolidados"):
         st.dataframe(df_dividends, hide_index=True)
@@ -123,6 +154,10 @@ def assets_fii_page():
     """Main Streamlit page function."""
     page_config = set_page_config(page_title='FIIs')
     st.set_page_config(**page_config)
+
+    # Check login before loading the page
+    check_login()
+
     st.title('Carteira de FIIs')
     st.markdown("***")
 
