@@ -66,9 +66,8 @@ class DataVisualizer:
                         df: pd.DataFrame,
                         x_data: str,
                         y_data: Union[str, List[str]],
-                        dataframe_name: str,
-                        ylabel: Union[str, None] = None,
-                        title: str = None) -> go.Figure:
+                        title: str = None,
+                        tickformat: str = None) -> go.Figure:
         """
         Generate and display a line plot using Plotly Express.
 
@@ -77,9 +76,8 @@ class DataVisualizer:
             x_data (str): The column name in the DataFrame to be used as the x-axis data.
             y_data (Union[str, List[str]]): The column name(s) in the DataFrame to be used as the y-axis data.
                 It can be a single column name as a string or a list of column names.
-            dataframe_name (str): The name of the DataFrame.
-            ylabel (Union[str, None]): The label for the y-axis. If None, the label will not be set.
             title (str): The title for the plot. If None, the title will not be set.
+            tickformat (str, optional): The tick format to be used in the x-axis labels. Defaults to None.
 
         Returns:
             go.Figure: The Plotly figure containing the line plot.
@@ -93,18 +91,19 @@ class DataVisualizer:
             line_colors = self.get_r4ven_color_palette()
 
             # Creating a line plot with Plotly Express
-            fig = px.line(df, x=x_data, y=y_data, title=f'Line Plot of the {dataframe_name}',
+            fig = px.line(df, x=x_data, y=y_data, title=title,
                           color_discrete_sequence=line_colors)
 
             # Updating the traces of the plot to display both lines and markers
             fig.update_traces(mode='lines+markers')
 
-            # Adjust y-axis range to ensure 0 is always visible
-            fig.update_yaxes(range=[0, max(df[y_data].max() * 1.1)])  # Adjust multiplier as needed
+            # Optionally format the ticks for date/time
+            fig.update_xaxes(tickformat=tickformat)
 
-            # Setting the label for the y-axis if ylabel is provided and y_data is a single string
-            if isinstance(y_data, str) and ylabel is not None:
-                fig.update_yaxes(title=title)
+            # Adjust y-axis range to ensure 0 is always visible
+            y_max = df[y_data].max() * 1.1
+            y_max = y_max.max() if isinstance(y_max, pd.Series) else y_max
+            fig.update_yaxes(range=[0, y_max])
 
             # Return the plot
             return fig
@@ -491,6 +490,42 @@ def show_bar_chart(df: pd.DataFrame,
         x_data=x_data,
         y_value_data=y_value_data,
         y_value_label=y_value_label,
+        title=title,
+        tickformat=tickformat
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+def show_line_chart(df: pd.DataFrame,
+                   x_data: str,
+                   y_data: str,
+                   title: str,
+                   tickformat: str = None):
+    """
+    Display a bar chart for accumulated income data.
+
+    Args:
+        df (DataFrame): The input data frame containing income details.
+        x_data (str): The column name representing the x-axis.
+        y_data(str): The column name representing the y-axis.
+        title (str): The title of the chart.
+        tickformat (str): The format for the x-axis ticks.
+            Defaults to None, to auto-format the x-axis.
+
+    Returns:
+        None: Displays the generated stacked bar chart.
+    """
+    # Ensure DataFrame is sorted by x_data
+    df_sorted = df.sort_values(by=x_data)
+
+    logs_folder = get_src_folder()
+    viz = DataVisualizer(logs_folder)
+
+    # Plot the accumulated values
+    fig = viz.r4ven_line_plot(
+        df=df_sorted,
+        x_data=x_data,
+        y_data=y_data,
         title=title,
         tickformat=tickformat
     )
