@@ -102,6 +102,8 @@ def get_valid_aggregate_options(df: pd.DataFrame, date_column: str) -> List[str]
               - 'Year': Included if there are 12 or more unique months in the date column.
     """
 
+    df[date_column] = pd.to_datetime(df[date_column], errors='coerce')
+
     unique_months = df[date_column].dt.to_period('M').nunique()
     aggregate_options = ['Mês', 'Trimestre', 'Ano']
     valid_options = []
