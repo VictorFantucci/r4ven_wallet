@@ -98,7 +98,12 @@ class DataVisualizer:
             fig.update_traces(mode='lines+markers')
 
             # Optionally format the ticks for date/time
-            fig.update_xaxes(tickformat=tickformat)
+
+            fig.update_xaxes(
+                tickformat=tickformat,
+                tickvals=df[x_data].unique(),
+                tickangle=45
+            )
 
             # Adjust y-axis range to ensure 0 is always visible
             y_max = df[y_data].max() * 1.1
@@ -113,16 +118,15 @@ class DataVisualizer:
             raise
 
     def r4ven_bar_plot(self,
-                    df: pd.DataFrame,
-                    x_data: str,
-                    y_value_data: str,
-                    y_value_label: str = None,
-                    group_method: str = 'sum',
-                    title: str = None,
-                    tickformat: str = None,
-                    orientation: str = 'vertical') -> go.Figure:
+                        df: pd.DataFrame,
+                        x_data: str,
+                        y_value_data: str,
+                        y_value_label: str = None,
+                        group_method: str = 'sum',
+                        title: str = None,
+                        tickformat: str = None) -> go.Figure:
         """
-        Generate and display a simple bar plot using Plotly with adjustable orientation.
+        Generate and display a simple vertical bar plot using Plotly.
 
         Args:
             df (pd.DataFrame): The DataFrame containing the data to be plotted.
@@ -134,13 +138,12 @@ class DataVisualizer:
                 - 'size': Counts the number of occurrences for each category.
             title (str, optional): The title for the plot. Defaults to None.
             tickformat (str, optional): The tick format to be used in the x-axis labels. Defaults to None.
-            orientation (str, optional): The orientation of the bars, 'vertical' or 'horizontal'. Defaults to 'vertical'.
 
         Returns:
             go.Figure: The Plotly figure containing the bar plot.
 
         Raises:
-            ValueError: If an invalid `group_method` is provided or orientation is not valid.
+            ValueError: If an invalid `group_method` is provided.
         """
 
         # Create a logger object for this function
@@ -150,10 +153,6 @@ class DataVisualizer:
             # Validate group_method
             if group_method not in ['sum', 'size']:
                 raise ValueError("group_method must be either 'sum' or 'size'.")
-
-            # Validate orientation
-            if orientation not in ['vertical', 'horizontal']:
-                raise ValueError("orientation must be either 'vertical' or 'horizontal'.")
 
             # Filter out rows where x_data is None or NaN
             df = df[df[x_data].notna()]
@@ -174,44 +173,29 @@ class DataVisualizer:
             bar_colors = self.get_r4ven_color_palette()
 
             # Add a single trace for the bar chart
-            if orientation == 'vertical':
-                fig.add_trace(go.Bar(
-                    x=grouped_data[x_data],
-                    y=grouped_data[y_value_data],
-                    name=y_value_label,
-                    marker=dict(color=bar_colors[0]),
-                    text=grouped_data[y_value_data].apply(lambda v: f"{v:.2f}" if isinstance(v, float) else str(v)),
-                    textposition='auto',
-                    opacity=0.7  # Adjust opacity to make the text pop
-                ))
-            else:  # 'horizontal'
-                fig.add_trace(go.Bar(
-                    x=grouped_data[y_value_data],
-                    y=grouped_data[x_data],
-                    name=y_value_label,
-                    marker=dict(color=bar_colors[0]),
-                    text=grouped_data[y_value_data].apply(lambda v: f"{v:.2f}" if isinstance(v, float) else str(v)),
-                    textposition='auto',
-                    opacity=0.7
-                ))
+            fig.add_trace(go.Bar(
+                x=grouped_data[x_data],
+                y=grouped_data[y_value_data],
+                name=y_value_label,
+                marker=dict(color=bar_colors[0]),
+                text=grouped_data[y_value_data].apply(lambda v: f"{v:.2f}" if isinstance(v, float) else str(v)),
+                textposition='auto',
+                opacity=0.7  # Adjust opacity to make the text pop
+            ))
 
             # Updating layout to create the bar plot
             fig.update_layout(
                 title_text=title,
-                barmode='group',  # Group bars for non-stacked visualization
+                barmode='group'  # Group bars for non-stacked visualization
             )
 
             # Updating axes labels
-            if orientation == 'vertical':
-                fig.update_yaxes(title_text=y_value_label)
-                fig.update_xaxes(
-                    tickformat=tickformat  # Optionally format the ticks for date/time
-                )
-            else:
-                fig.update_xaxes(title_text=y_value_label)
-                fig.update_yaxes(
-                    tickformat=tickformat  # Optionally format the ticks for date/time
-                )
+            fig.update_yaxes(title_text=y_value_label)
+            fig.update_xaxes(
+                tickformat=tickformat,
+                tickvals=df[x_data].unique(),
+                tickangle=45
+            )
 
             # Return the plot
             return fig
@@ -411,7 +395,6 @@ class DataVisualizer:
             logger.error(f"Pie chart visualization failed: {e}")
             raise
 
-
 # ------------------------------------------------------------------------------------------------ #
 # VIZ FUNCTIONS
 
@@ -497,10 +480,10 @@ def show_bar_chart(df: pd.DataFrame,
     st.plotly_chart(fig, use_container_width=True)
 
 def show_line_chart(df: pd.DataFrame,
-                   x_data: str,
-                   y_data: str,
-                   title: str,
-                   tickformat: str = None):
+                    x_data: str,
+                    y_data: str,
+                    title: str,
+                    tickformat: str = None):
     """
     Display a bar chart for accumulated income data.
 
@@ -533,11 +516,11 @@ def show_line_chart(df: pd.DataFrame,
     st.plotly_chart(fig, use_container_width=True)
 
 def show_accumulated_bar_chart(df: pd.DataFrame,
-                                      x_data: str,
-                                      y_value_data: str,
-                                      y_value_label: str,
-                                      title: str,
-                                      tickformat: str = None):
+                               x_data: str,
+                               y_value_data: str,
+                               y_value_label: str,
+                               title: str,
+                               tickformat: str = None):
     """
     Display a bar chart for accumulated income data.
 
@@ -573,6 +556,32 @@ def show_accumulated_bar_chart(df: pd.DataFrame,
         y_value_label=y_value_label,
         title=title,
         tickformat=tickformat
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+def show_pie_plot(df: pd.DataFrame,
+                  value_column: str,
+                  label_column: str,
+                  title: str):
+    """_summary_
+
+    Args:
+        df (pd.DataFrame): _description_
+        value_column (str): _description_
+        label_column (str): _description_
+        title (str): _description_
+    """
+
+    logs_folder = get_src_folder()
+    viz = DataVisualizer(logs_folder)
+
+    # Plot pie plot
+    fig = viz.r4ven_pie_plot(
+        df=df,
+        value_column=value_column,
+        label_column=label_column,
+        title=title
     )
 
     st.plotly_chart(fig, use_container_width=True)
