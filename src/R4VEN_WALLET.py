@@ -2,21 +2,64 @@
 Script that contains the streamlit application of my financial independence wallet.
 """
 
-# Load imports
+# ------------------------------------------------------------------------------------------------ #
+# IMPORTS
 import os
 import sys
 import streamlit as st
 from PIL import Image
 
-# Load relative imports
-from utils import get_src_folder
-from data.load_data import WalletDataLoader
-from components.components import set_page_config, check_login
+# ------------------------------------------------------------------------------------------------ #
+# RELATIVE IMPORTS
 
+# UTILS
+from utils import get_src_folder
+
+# DATA
+from data.load_data import AssetsDataLoader, WalletDataLoader
+
+# COMPONENTS
+from components.components import set_page_config, check_login
+from components.components import \
+    (
+        get_valid_aggregate_options,
+        aggregate_by_time,
+        filter_data_by_time
+    )
+
+# VIZ
+from components.viz import show_line_chart, show_pie_plot
+
+# ------------------------------------------------------------------------------------------------ #
+# DEFINE CONSTANTS
 app_directory =  os.path.dirname(os.path.dirname(__file__))
 sys.path.append(app_directory)
 
-import streamlit as st
+logs_folder = get_src_folder()
+
+# ------------------------------------------------------------------------------------------------ #
+# WALLET  FUNCTIONS
+def display_wallet_goal(wallet_loader):
+    """Display wallet goal"""
+
+    st.header("Metas", divider='grey')
+
+    # Wallet Goal
+    wallet_goal = wallet_loader.load_wallet_goal()
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader('Meta Atual da Carteira')
+        st.dataframe(wallet_goal, hide_index=True)
+        st.markdown("""
+                    _**Quem não sabe onde quer chegar, qualquer lugar serve, ATÉ LUGAR NENHUM**._
+
+                    > Prof. Mira
+                    """)
+    with col2:
+        st.subheader('Metas a bater:')
+        investment_goals(wallet_goal.iloc[0, 1])
 
 def investment_goals(current_value: float) -> None:
     """
@@ -64,7 +107,86 @@ def investment_goals(current_value: float) -> None:
             for amount, text in goals_col2
         ))
 
-# Main function
+# ------------------------------------------------------------------------------------------------ #
+# WALLET DIVISION FUNCTIONS
+def display_wallet_division(wallet_loader):
+    """Display wallet division and strategy"""
+
+    st.header("Alocação da Carteira", divider='gray')
+
+    # Wallet Division
+    wallet_division = wallet_loader.load_wallet_division()
+    wallet_division.loc[:, ['% Ideal', '% Atual']] *= 100
+
+    st.dataframe(wallet_division, hide_index=True)
+
+# ------------------------------------------------------------------------------------------------ #
+# WALLET OVERVIEW FUNCTIONS
+def display_walllet_overview(wallet_loader, assets_loader):
+    """Display Wallet Overview and Results"""
+
+    st.header('Resultado da Carteira', divider='grey')
+
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+    # Wallet Overview
+    wallet_overview = wallet_loader.load_wallet_overview()
+    wallet_overview.loc[:, ['Variação (%)']] *= 100
+
+    with col1:
+        st.metric('Gasto',
+                  value=f"R${wallet_overview['Gasto (R$)'].iloc[0]:,.2f}")
+
+    with col2:
+        st.metric('Total Investido',
+                  value=f"R${wallet_overview['Investido (R$)'].iloc[0]:,.2f}",
+                  delta=f"{wallet_overview['Variação (%)'].iloc[0]:,.2f}%")
+
+    with col3:
+        st.metric('Ganho Total',
+                  value=f"R${wallet_overview['Ganho Total (R$)'].iloc[0]:,.2f}")
+
+    with col4:
+        st.metric('Proventos',
+                  value=f"R${wallet_overview['Proventos (R$)'].iloc[0]:,.2f}")
+
+    with col5:
+        st.metric('Vendido',
+                  value=f"R${wallet_overview['Vendido (R$)'].iloc[0]:,.2f}")
+
+    with col6:
+        st.metric('Lucro Vendas',
+                  value=f"R${wallet_overview['Lucro Vendas (R$)'].iloc[0]:,.2f}")
+
+    display_dividends(assets_loader)
+
+def display_dividends(assets_loader):
+    """Displays dividend information."""
+
+    df = assets_loader.load_asset_dividends_data()
+    df = df[['Mês', 'Dia Final', 'Total (R$)', 'Acumulado (R$)',
+                                 'Total Investido (R$)', 'DY - Carteira (%)']][:-1]
+    df.loc[:, ['DY - Carteira (%)']] *= 100
+
+    # Get valid options for aggregation based on the date column
+    valid_options = get_valid_aggregate_options(df=df, date_column='Dia Final')
+
+    # The selected time period from the dropdown menu.
+    filter_by = filter_data_by_time(valid_options)
+
+    df_agg = aggregate_by_time(df, 'Dia Final', 'DY - Carteira (%)', filter_by, {'sum'})
+    df_agg.rename(columns={'sum - DY - Carteira (%)': 'DY - Carteira (%)'}, inplace=True)
+
+    show_line_chart(df_agg,
+                    'Período',
+                    'DY - Carteira (%)',
+                    'DY - Carteira (%)',
+                    '%Y-%m'
+                    )
+
+# ------------------------------------------------------------------------------------------------ #
+# MAIN FUNCTION
+
 def app() -> None:
 
     # Create configuration dict
@@ -77,8 +199,9 @@ def app() -> None:
 
     st.title('R4VEN - Independência Financeira')
 
-    # Initialize the WalletDataLoader
-    wallet_loader = WalletDataLoader(logs_folder=get_src_folder())
+    # Initialize the Data Loaders
+    wallet_loader = WalletDataLoader(logs_folder)
+    assets_loader = AssetsDataLoader(logs_folder)
 
     with st.expander('O que me motiva?'):
         st.markdown("""
@@ -97,38 +220,14 @@ def app() -> None:
                     - **Quero ser simplesmente livre.**
                     """)
 
-    st.header(" Visão Geral", divider='gray')
+    # WALLET GOAL
+    display_wallet_goal(wallet_loader)
 
-    # Wallet Goal
-    wallet_goal = wallet_loader.load_wallet_goal()
+    # WALLET DIVISION
+    display_wallet_division(wallet_loader)
 
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.subheader('Meta Atual da Carteira')
-        st.dataframe(wallet_goal, hide_index=True)
-        st.markdown("""
-                    _**Quem não sabe onde quer chegar, qualquer lugar serve, ATÉ LUGAR NENHUM**._
-
-                    > Prof. Mira
-                    """)
-    with col2:
-        st.subheader('Metas a bater:')
-        investment_goals(wallet_goal.iloc[0, 1])
-
-    with col1:
-        # Wallet Overview
-        st.subheader('Resultado da Carteira')
-        wallet_overview = wallet_loader.load_wallet_overview()
-        wallet_overview.loc[:, ['Variação (%)']] *= 100
-        st.dataframe(wallet_overview, hide_index=True)
-
-    with col1:
-        # Wallet Division
-        st.subheader("Alocação da Carteira")
-        wallet_division = wallet_loader.load_wallet_division()
-        wallet_division.loc[:, ['% Ideal', '% Atual']] *= 100
-        st.dataframe(wallet_division, hide_index=True)
+    # WALLET OVERVIEW
+    display_walllet_overview(wallet_loader, assets_loader)
 
 if __name__ == '__main__':
     app()
