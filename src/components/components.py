@@ -95,10 +95,8 @@ def get_valid_aggregate_options(df: pd.DataFrame, date_column: str) -> List[str]
 
     Returns:
         list: A list of valid aggregation options. The options include:
-              - 'Day': Included if there are 31 or fewer unique days in the date column.
-              - 'Month': Included if there are more than 31 unique days in the date column.
-              - 'Quarter': Included if there are 3 or more unique months in the date column.
-              - 'Semester': Included if there are 6 or more unique months in the date column.
+              - 'Month': Included if there are less than 24 unique months in the date column.
+              - 'Quarter': Included if there are 6 or more unique months in the date column.
               - 'Year': Included if there are 12 or more unique months in the date column.
     """
 
@@ -114,8 +112,6 @@ def get_valid_aggregate_options(df: pd.DataFrame, date_column: str) -> List[str]
         valid_options.append(aggregate_options[1])
     if unique_months >= 12:
         valid_options.append(aggregate_options[2])
-    if unique_months >= 24:
-        valid_options.append(aggregate_options[3])
 
     return valid_options
 
