@@ -6,10 +6,11 @@ O app consome dados de uma planilha Google Sheets via **API do Google** e **gspr
 ## 🚀 Funcionalidades
 
 - **📌 Home Page** - Visão geral da carteira de investimentos.
-- **📈 Ações** - Informações detalhadas sobre a carteira de ações, incluindo resultados e proventos. Futuramente: valuation e proteção de carteira.
-- **🏢 FIIs** - Análise da carteira de FIIs, com dados de rendimento e desempenho. Futuramente: valuation e proteção de carteira.
+- **📈 Ações** - Informações detalhadas sobre a carteira de ações, incluindo resultados e proventos.
+- **🏢 FIIs** - Análise da carteira de FIIs, com dados de rendimento e desempenho
 - **📜 Lançamentos** - Histórico completo de ordens de compra e venda.
 - **💰 Proventos** - Histórico consolidado dos proventos recebidos.
+- **🔮 Simulações** - Permite simular cenários de investimentos, calculando o tempo necessário para atingir uma meta de investimento, considerando contribuições mensais, taxa de retorno e inflação.
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -18,12 +19,14 @@ O app consome dados de uma planilha Google Sheets via **API do Google** e **gspr
 - [gspread](https://github.com/burnash/gspread) - Biblioteca para interação com o Google Sheets.
 - [Pandas](https://pandas.pydata.org/) - Manipulação e análise de dados.
 - [python-dotenv](https://pypi.org/project/python-dotenv/) - Gerenciamento de variáveis de ambiente.
+- [Plotly](https://plotly.com/) - Biblioteca para visualização interativa de dados.
+- [r4ven_utils](https://github.com/seuusuario/r4ven_utils) - Biblioteca para logging do projeto.
 
 ## 📦 Como Instalar e Executar
 
 1. Clone este repositório:
    ```bash
-   git clone https://github.com/seuusuario/seu-repositorio.git
+   git clone https://github.com/VictorFantucci/r4ven_wallet
    ```
 2. Acesse o diretório do projeto:
    ```bash
@@ -31,16 +34,13 @@ O app consome dados de uma planilha Google Sheets via **API do Google** e **gspr
    ```
 3. Crie um ambiente virtual e instale as dependências:
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # No Windows: venv\Scripts\activate
+   python -m venv env
+   source env/bin/activate  # No Windows: env\Scripts\activate
    pip install -r requirements.txt
    ```
 4. Configure as credenciais da API do Google Sheets:
-   - Baixe o arquivo JSON das credenciais e salve na raiz do projeto.
-   - Crie um arquivo `.env` na raiz do projeto e adicione:
-     ```ini
-     GOOGLE_APPLICATION_CREDENTIALS=caminho/para/credenciais.json
-     ```
+   - Baixe o arquivo JSON das credenciais e salve na pasta `src` do projeto.
+   - Crie um arquivo `.env` na pasta `src` do projeto e preencha conforme o arquivo `.env` disponível no GitHub:
    - O aplicativo carregará automaticamente as variáveis do `.env` usando `python-dotenv`.
 
 5. Acesse o diretório `src` antes de executar o aplicativo:
@@ -49,7 +49,7 @@ O app consome dados de uma planilha Google Sheets via **API do Google** e **gspr
    ```
 6. Execute o aplicativo:
    ```bash
-   streamlit run app.py
+   streamlit run R4VEN_WALLET.py
    ```
 
 ## 📌 Roadmap Futuro
