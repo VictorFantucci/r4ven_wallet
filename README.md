@@ -30,7 +30,7 @@ O app consome dados de uma planilha Google Sheets via **API do Google** e **gspr
    ```
 2. Acesse o diretório do projeto:
    ```bash
-   cd seu-repositorio
+   cd r4ven_wallet
    ```
 3. Crie um ambiente virtual e instale as dependências:
    ```bash
