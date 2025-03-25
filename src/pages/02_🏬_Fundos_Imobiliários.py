@@ -28,7 +28,7 @@ from components.components import \
 
 # VIZ
 from components.viz import DataVisualizer
-from components.viz import show_bar_chart
+from components.viz import show_bar_chart, show_line_chart
 
 # ------------------------------------------------------------------------------------------------ #
 # DEFINE CONSTANTS
@@ -91,6 +91,14 @@ def display_dividends(assets_loader, log_loader):
     # Filter stocks data
     df = df[df['Tipo Ativo'] == 'FII']
 
+    with st.expander('DY - FIIs (%)'):
+        show_line_chart(df_dividends,
+                        'Mês',
+                        'DY - FII (%)',
+                        'DY - FII (%)',
+                        '%Y-%m'
+                        )
+
     st.subheader('1 - Visão Anualizada')
 
     # Extract unique years for filter selection
@@ -113,6 +121,10 @@ def display_dividends(assets_loader, log_loader):
 
     # Add "Total" Column
     pivot_df["Total"] = pivot_df.sum(axis=1)
+
+    # Add "Soma" Row for Column Totals
+    column_sums = pivot_df.sum(axis=0)  # Sum of columns
+    pivot_df.loc['Soma'] = column_sums
 
     st.dataframe(pivot_df, use_container_width=True)
 

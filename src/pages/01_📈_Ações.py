@@ -123,6 +123,10 @@ def display_dividends(assets_loader, log_loader):
     # Add "Total" Column
     pivot_df["Total"] = pivot_df.sum(axis=1)
 
+    # Add "Soma" Row for Column Totals
+    column_sums = pivot_df.sum(axis=0)  # Sum of columns
+    pivot_df.loc['Soma'] = column_sums
+
     st.dataframe(pivot_df, use_container_width=True)
 
     st.subheader('2 - Visão por Período')
