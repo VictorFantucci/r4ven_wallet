@@ -39,27 +39,24 @@ class DataVisualizer:
         return self.log_manager.function_logger(__file__, console_level=logging.INFO)
 
     def get_r4ven_color_palette(self):
-        """ Helper method to get the Nord color palette"""
+        """Helper method to get the Sweetie 16 color palette."""
         return [
-            # Light Colors
-            "#81A1C1",  # Light Blue
-            "#88C0D0",  # Light Cyan
-            "#A3BE8C",  # Light Green
-            "#EBCB8B",  # Light Yellow
-            "#D08770",  # Light Orange
-            "#BF616A",  # Light Red
-            "#B48EAD",  # Light Pink
-            "#D8DEE9",  # Light Gray
-
-            # Dark Colors
-            "#5E81AC",  # Dark Blue
-            "#4C566A",  # Dark Gray-Blue
-            "#556B2F",  # Dark Green
-            "#8F734D",  # Dark Yellow
-            "#9D5C4C",  # Dark Orange
-            "#7D3A3A",  # Dark Red
-            "#7D5A87",  # Dark Pink
-            "#3B4252",  # Dark Gray
+            "#A7F070",  # Fresh Green
+            "#5D275D",  # Rich Purple
+            "#FFCD75",  # Soft Gold
+            "#EF7D57",  # Warm Coral
+            "#B13E53",  # Deep Red
+            "#38B764",  # Vibrant Teal Green
+            "#FF79C6",  # Pink
+            "#8BE9FD",  # Cyan
+            "#73EFF7",  # Soft Cyan
+            "#41A6F6",  # Sky Blue
+            "#3B5DC9",  # Bright Blue
+            "#257179",  # Deep Cyan
+            "#29366F",  # Dark Indigo
+            "#94B0C2",  # Muted Blue-Gray
+            "#F4F4F4",  # Light Gray-White
+            "#333C57",  # Charcoal Blue
         ]
 
     def r4ven_line_plot(self,
