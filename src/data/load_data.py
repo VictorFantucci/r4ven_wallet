@@ -200,7 +200,7 @@ class WalletDataLoader:
         df = self._fetch_data()  # Fetch the data
         if df is not None:
             # Extract the relevant rows for wallet division
-            df_division = df.iloc[2:5]
+            df_division = df.iloc[2:6]
 
             # Set the first row as the new header
             df_division.columns = df_division.iloc[0]
@@ -239,13 +239,13 @@ class WalletDataLoader:
         df = self._fetch_data()  # Fetch the data
         if df is not None:
             # Extract the relevant rows for wallet goal
-            df_goal = df.iloc[6:8]
+            df_goal = df.iloc[7:9]
 
             # Set the first row as the new header
             df_goal.columns = df_goal.iloc[0]
 
             # Drop the first row (now used as header)
-            df_goal = df_goal.drop(6)
+            df_goal = df_goal.drop(7)
 
             # Reset the index for proper DataFrame structure
             df_goal = df_goal.reset_index(drop=True)
