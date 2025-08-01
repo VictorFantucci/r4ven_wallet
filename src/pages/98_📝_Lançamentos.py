@@ -50,6 +50,11 @@ def log_transaction_page():
     st.title('Lançamentos')
     st.markdown("***")
 
+    selection_dict = {'Compras': 'building-add',
+                      'Vendas': 'building-dash'}
+
+    selection, options = set_page_main_menu(selection_dict)
+
     # Create an instance of the LogsDataLoader class
     data_loader = LogsDataLoader(get_src_folder())
 
@@ -65,32 +70,44 @@ def log_transaction_page():
     df_agg = aggregate_by_time(df, 'Data', 'Preço Total (R$)', filter_by, {'sum'}, ['Compra/Venda', 'Tipo Ativo'])
     df_agg.rename(columns={'sum - Preço Total (R$)': 'Preço Total (R$)'}, inplace=True)
 
-    # Filter purchases
-    purchases = df_agg[df_agg["Compra/Venda"] == "C"]
+    if selection == options[0]:
 
-    # Filter sales
-    sales = df_agg[df_agg["Compra/Venda"] == "V"]
+        # Filter purchases
+        purchases = df_agg[df_agg["Compra/Venda"] == "C"]
 
-    # Purchases
-    show_stacked_bar_chart(purchases,
-                           'Período',
-                            'Tipo Ativo',
-                            'Preço Total (R$)',
-                            f'Compras x {filter_by}')
+        # Purchases
+        show_stacked_bar_chart(purchases,
+                            'Período',
+                                'Tipo Ativo',
+                                'Preço Total (R$)',
+                                f'Compras x {filter_by}')
 
-    # Sales
-    show_stacked_bar_chart(sales,
-                           'Período',
-                            'Tipo Ativo',
-                            'Preço Total (R$)',
-                            f'Vendas x {filter_by}')
+        st.markdown('***')
+        with st.expander(f"📝 Ver compras agregadas por: {filter_by}"):
+            st.dataframe(df_agg[df_agg["Compra/Venda"] == "C"], hide_index=True)
 
-    st.markdown('***')
-    with st.expander(f"📝 Ver Lançamentos Agregados por {filter_by}"):
-        st.dataframe(df_agg, hide_index=True)
+        with st.expander("📝 Ver histórico de compras"):
+            st.dataframe(df[df["Compra/Venda"] == "C"], hide_index=True)
 
-    with st.expander("📝 Ver Histórico de Lançamentos"):
-        st.dataframe(df, hide_index=True)
+    elif selection == options[1]:
+
+        # Filter sales
+        sales = df_agg[df_agg["Compra/Venda"] == "V"]
+
+
+        # Sales
+        show_stacked_bar_chart(sales,
+                            'Período',
+                                'Tipo Ativo',
+                                'Preço Total (R$)',
+                                f'Vendas x {filter_by}')
+
+        st.markdown('***')
+        with st.expander(f"📝 Ver vendas agregadas por: {filter_by}"):
+            st.dataframe(df_agg[df_agg["Compra/Venda"] == "V"], hide_index=True)
+
+        with st.expander("📝 Ver histórico de vendas"):
+            st.dataframe(df[df["Compra/Venda"] == "V"], hide_index=True)
 
 if __name__ == "__main__":
     log_transaction_page()

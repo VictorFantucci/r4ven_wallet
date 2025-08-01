@@ -25,7 +25,6 @@ from components.components import \
         filter_data_by_time
     )
 
-
 # VIZ
 from components.viz import show_line_chart, show_bar_chart
 
@@ -41,8 +40,8 @@ def simulate_time_to_goal():
 
     # Input fields
     with st.expander("Configurações do Investimento", expanded=True):
-        initial_investment = st.number_input("Investimento Inicial", min_value=0.0, value=10000.0, step=1000.0)
-        monthly_contribution = st.number_input("Contribuição Mensal", min_value=0.0, value=500.0, step=50.0)
+        initial_investment = st.number_input("Investimento Inicial", min_value=0.0, value=10000.0, step=0.01)
+        monthly_contribution = st.number_input("Contribuição Mensal", min_value=0.0, value=500.0, step=0.01)
         monthly_rate = st.number_input("Taxa de Retorno Mensal (%)", min_value=0.0, value=0.77, step=0.01) / 100
         annual_inflation = st.number_input("Inflação Anual (%)", min_value=0.0, value=4.5, step=0.1) / 100
         goal = st.number_input("Meta de Investimento", min_value=0.0, value=100000.0, step=1000.0)
@@ -52,10 +51,10 @@ def simulate_time_to_goal():
         current_date = datetime.today()
 
         # Create a date selector with the current date as the default value
-        selected_date = st.date_input("Data de Início", current_date)
+        start_date = st.date_input("Data de Início", current_date)
 
         # Convert the selected date to a string in the format YYYY-MM
-        selected_date_str = selected_date.strftime('%Y-%m')
+        start_date_str = start_date.strftime('%Y-%m')
 
     # Calculation
     result = calculate_time_to_goal(initial_investment,
@@ -64,7 +63,7 @@ def simulate_time_to_goal():
                                     annual_inflation,
                                     goal,
                                     annual_contribution_adjustment,
-                                    selected_date_str)
+                                    start_date_str)
 
     df = result['dataframe']
 
@@ -75,12 +74,16 @@ def simulate_time_to_goal():
     st.markdown(f"- **Taxa de Retorno Mensal**: {monthly_rate * 100:.2f}%")
     st.markdown(f"- **Inflação Anual**: {annual_inflation * 100:.2f}%")
     st.markdown(f"- **Ajuste Anual da Contribuição**: {annual_contribution_adjustment * 100:.2f}%")
-    st.markdown(f"- **Data de Início**: {selected_date_str}")
+    st.markdown(f"- **Data de Início**: {start_date_str}")
+
+    st.markdown("***")
 
     # Show the time it takes to reach the goal
-    st.markdown(f"Para atingir a meta de investimento de **R${goal:,.2f}**, serão necessários "
-                f"**{result['years']} anos e {result['months']} meses**.")
-    st.markdown(f"A meta será atingida, provavelmente, em **{result['expected_year_month']}**.")
+    st.markdown(f"A meta será atingida, provavelmente, em **{result['expected_year_month']}**. "
+                f"Serão necessários **{result['years']} anos e {result['months']} meses**.")
+    st.markdown(f"Os **R\$ {goal:,.2f}** da meta desejada, "
+                f"considerando uma inflação anual de **{annual_inflation * 100:.2f}%**, "
+                f"equivale a **R\$ {result['adjusted_goal']:,.2f}** em **{result['expected_year_month']}**.")
 
     # Convert pd.Period to str
     df['Mês'] = df['Mês'].astype(str)
@@ -103,10 +106,10 @@ def simulate_time_to_goal():
                                 'Mês',
                                 ['Patrimônio (R$)', 'Proventos (R$)'],
                                 filter_by,
-                                {'sum'})
+                                {'max'})
 
-    df_agg.rename(columns={'sum - Patrimônio (R$)': 'Patrimônio (R$)',
-                            'sum - Proventos (R$)': 'Proventos (R$)'}, inplace=True)
+    df_agg.rename(columns={'max - Patrimônio (R$)': 'Patrimônio (R$)',
+                           'max - Proventos (R$)': 'Proventos (R$)'}, inplace=True)
 
     col1, col2 = st.columns(2)
 
@@ -136,7 +139,6 @@ def simulate_time_to_goal():
     if filter_by != 'Mês':
         with st.expander(f'Progresso do investimento - {filter_by}'):
             st.dataframe(df_agg, hide_index=True)
-
 
 # ------------------------------------------------------------------------------------------------ #
 # MAIN FUNCTION
