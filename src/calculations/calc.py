@@ -7,9 +7,10 @@ Script that contains calculations for the application simulation.
 
 import pandas as pd
 from datetime import datetime
+from scipy.optimize import fsolve
 
 # ------------------------------------------------------------------------------------------------ #
-# CALCULATIONS
+# SIMULATIONS
 
 def calculate_time_to_goal(initial_investment: float,
                            monthly_contribution: float,
@@ -44,6 +45,7 @@ def calculate_time_to_goal(initial_investment: float,
     # Extract year and month from start_year_month
     start_year, start_month = map(int, start_year_month.split('-'))
     current_date = datetime(start_year, start_month, 1)
+    start_date = current_date 
 
     data = []  # List to store DataFrame data
     total_return_last_month = 0
@@ -70,7 +72,7 @@ def calculate_time_to_goal(initial_investment: float,
             current_date = current_date.replace(year=current_date.year + 1, month=1)
         else:
             current_date = current_date.replace(month=current_date.month + 1)
-        
+
         total_return_last_month = total_return  # Update total return for next month's contribution
 
         # Every 12 months, adjust the contribution by the annual adjustment rate
@@ -82,8 +84,15 @@ def calculate_time_to_goal(initial_investment: float,
     df = pd.DataFrame(data)
 
     # Calculate the expected year-month when the goal is reached
-    expected_year_month = (current_date.replace(year=current_date.year + years, month=current_date.month + remaining_months)
-                           .strftime('%Y-%m'))
+    if start_date.month + remaining_months <= 12:
+        expected_year_month = (start_date.replace(year=start_date.year + years,
+                                                    month=start_date.month + remaining_months)
+                            .strftime('%Y-%m'))
+    else:
+        fix_remaining_months = (start_date.month + remaining_months) - 12
+        expected_year_month = (start_date.replace(year=start_date.year + years + 1,
+                                                    month=fix_remaining_months)
+                            .strftime('%Y-%m'))
 
     result = {
         "initial_investment": initial_investment,
@@ -91,6 +100,7 @@ def calculate_time_to_goal(initial_investment: float,
         "monthly_rate": monthly_rate,
         "annual_inflation": annual_inflation,
         "goal": goal,
+        "adjusted_goal": adjusted_goal,
         "annual_contribution_adjustment": annual_contribution_adjustment,
         "years": years,
         "months": remaining_months,
