@@ -13,7 +13,11 @@ from PIL import Image
 # RELATIVE IMPORTS
 
 # UTILS
-from utils import get_src_folder
+from utils import \
+    (get_src_folder,
+     list_financial_goals,
+     financial_goals_achieved
+    )
 
 # DATA
 from data.load_data import AssetsDataLoader, WalletDataLoader
@@ -61,6 +65,10 @@ def display_wallet_goal(wallet_loader):
         st.subheader('Metas a bater:')
         investment_goals(wallet_goal.iloc[0, 1])
 
+    with st.expander('Histórico das Metas Conquistadas'):
+        goals_history = financial_goals_achieved(start_date='2024-06-04')
+        st.dataframe(goals_history , hide_index=True)
+
 def investment_goals(current_value: float) -> None:
     """
     Displays a list of financial goals in two columns in Markdown format,
@@ -71,20 +79,7 @@ def investment_goals(current_value: float) -> None:
     """
 
     # List of financial goals
-    goals = [
-        (25000, 'R$ 25,000'),
-        (50000, 'R$ 50,000'),
-        (75000, 'R$ 75,000'),
-        (100000, 'R$ 100,000'),
-        (250000, 'R$ 250,000'),
-        (500000, 'R$ 500,000'),
-        (750000, 'R$ 750,000'),
-        (1000000, 'R$ 1,000,000'),
-        (2500000, 'R$ 2,500,000'),
-        (5000000, 'R$ 5,000,000'),
-        (7500000, 'R$ 7,500,000'),
-        (10000000, 'R$ 10,000,000')
-    ]
+    goals = list_financial_goals()
 
     # Split goals into two halves for the columns
     mid_index = len(goals) // 2
